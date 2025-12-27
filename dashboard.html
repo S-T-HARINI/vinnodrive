@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            overflow: hidden;
+            background: #000000; /* pure black */
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .dashboard-box {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.08); /* semi-transparent glass */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(171, 71, 188, 0.3);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            margin: 10% auto;
+            color: white;
+        }
+
+        h1 {
+            color: #ab47bc; /* vibrant purple */
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 20px 0;
+        }
+
+        a {
+            display: block;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #ab47bc, #7e57c2);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(171, 71, 188, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Animated polygonal background -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- Dashboard content -->
+    <div class="dashboard-box">
+        <h1>Welcome, {{ user.username }}!</h1>
+
+        <ul>
+            <li><a href="/upload">Upload Files</a></li>
+            <li><a href="/files">My Files</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const points = [];
+        const numPoints = 45;
+        const maxDistance = 220;
+        const speed = 0.6;
+
+        for (let i = 0; i < numPoints; i++) {
+            points.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * speed,
+                vy: (Math.random() - 0.5) * speed
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const dx = points[i].x - points[j].x;
+                    const dy = points[i].y - points[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+
+                    if (dist < maxDistance) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[i].x, points[i].y);
+                        ctx.lineTo(points[j].x, points[j].y);
+                        ctx.strokeStyle = `rgba(171, 71, 188, ${1 - dist/maxDistance})`;
+                        ctx.lineWidth = 1.2;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            points.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#ab47bc';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ab47bc';
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+
+</body>
+</html>

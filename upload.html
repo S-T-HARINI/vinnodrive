@@ -1,0 +1,1299 @@
+<!DOCTYPE html> 
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VinnoDrive - {{ user }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #ffffff;
+            --panel-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a78bfa;
+            --accent-gradient: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            --border-color: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --panel-bg: rgba(17, 17, 17, 0.95);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --border-color: #2d2d2d;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        body, html {
+            min-height: 100vh;
+            background: var(--bg-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            
+           
+           cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><text y="18" font-size="18">🚀</text></svg>'), auto;
+
+        }
+        /* Keep pointer cursor for interactive elements */
+            a, button, input, select, textarea, [role="button"] {
+            cursor: pointer !important;
+            }
+
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-greeting {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-logout:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+            transform: translateY(-2px);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        [data-theme="dark"] .alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* Card Component */
+        .card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title-icon {
+            background: var(--accent-gradient);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Storage Quota */
+        .quota-container {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(167, 139, 250, 0.05));
+            border: 2px solid var(--accent-primary);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+        }
+
+        .quota-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 15px;
+        }
+
+        .quota-label {
+            color: var(--text-secondary);
+        }
+
+        .quota-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .quota-progress-bar {
+            height: 12px;
+            background: var(--bg-secondary);
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .quota-progress-fill {
+            height: 100%;
+            background: var(--accent-gradient);
+            border-radius: 100px;
+            transition: width 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quota-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .quota-progress-fill.warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+
+        .quota-progress-fill.danger {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+        }
+
+        .quota-percentage {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .quota-warning-text {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .quota-warning-text.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .quota-warning-text.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card.highlight {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(52, 211, 153, 0.05));
+        }
+
+        .stat-card.highlight::before {
+            background: var(--success);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-sublabel {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .stat-percentage {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--success);
+            margin-top: 8px;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 3px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 48px 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--bg-secondary);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent-primary);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(167, 139, 250, 0.05));
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
+            padding: 12px 32px;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .upload-folder-select {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .upload-folder-select label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-right: 12px;
+            font-weight: 500;
+        }
+
+        .select-input {
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        .select-input:hover {
+            border-color: var(--accent-primary);
+        }
+
+        /* Folder Creation */
+        .folder-form {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .text-input {
+            padding: 12px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            min-width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .text-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Folder/File List */
+        .folder-section {
+            margin-bottom: 24px;
+        }
+
+        .folder-summary {
+            background: var(--bg-secondary);
+            padding: 20px 24px;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .folder-summary:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .folder-icon {
+            font-size: 24px;
+        }
+
+        .folder-count {
+            margin-left: auto;
+            padding: 4px 12px;
+            background: var(--accent-gradient);
+            color: white;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .file-list {
+            padding: 16px 0;
+        }
+
+        .file-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+
+        .file-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .file-badge {
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-original {
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            color: white;
+            border: none;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 6px 16px;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .badge-duplicate {
+            background: rgba(156, 163, 175, 0.15);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+        
+
+        .file-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .file-meta-item {
+            display: flex;
+            gap: 8px;
+        }
+
+        .file-meta-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .file-meta-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-download {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-share {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-share:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-unshare {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-unshare:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .share-user-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .share-user-form select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .btn-share-private {
+            background: #9333ea;
+            color: white;
+        }
+
+        .btn-share-private:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .share-link-container {
+            margin-top: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(167, 139, 250, 0.05));
+            border: 1px solid var(--accent-primary);
+            border-radius: var(--radius-md);
+        }
+
+        .share-link-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .share-link-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .share-link-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn-copy {
+            padding: 10px 20px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-copy:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 20px;
+            }
+
+            .header-left {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .card-title {
+                font-size: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .text-input {
+                min-width: 100%;
+            }
+
+            .folder-form {
+                flex-direction: column;
+            }
+
+            .file-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .file-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-sm {
+                width: 100%;
+                text-align: center;
+            }
+
+            .share-link-input-group {
+                flex-direction: column;
+            }
+
+            .share-user-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .share-user-form select,
+            .share-user-form button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">🚀 VinnoDrive</div>
+                <span class="user-greeting">Welcome, <strong>{{ user }}</strong></span>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+                <a href="/logout" class="btn-logout">Logout</a>
+            </div>
+        </div>
+
+        <!-- Error Messages -->
+        {% if delete_error == "delete_duplicates_first" %}
+        <div class="alert alert-danger">
+            <span>⚠️</span>
+            <span>Cannot delete original file! Please delete all duplicate files first.</span>
+        </div>
+        {% endif %}
+
+        {% if upload_error == "rate_limit" %}
+        <div class="alert alert-danger">
+            <span>🚫</span>
+            <span>Rate limit exceeded! Please wait a moment before trying again. (Max 2 requests per second)</span>
+        </div>
+        {% endif %}
+
+        {% if upload_error == "quota" %}
+        <div class="alert alert-danger">
+            <span>💾</span>
+            <span>Storage quota exceeded! {{ request.query_params.get('msg', 'Please delete some files to free up space.') }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Storage Quota Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span class="card-title-icon">📊</span>
+                    Storage Quota
+                </h2>
+            </div>
+            <div class="quota-container">
+                <div class="quota-info">
+                    <span class="quota-label">Storage Used</span>
+                    <span class="quota-value">{{ storage_used_mb|round(2) }} MB / {{ storage_quota_mb|round(2) }} MB</span>
+                </div>
+                <div class="quota-progress-bar">
+                    <div class="quota-progress-fill {% if storage_percent >= 90 %}danger{% elif storage_percent >= 75 %}warning{% endif %}" 
+                         style="width: {{ storage_percent }}%">
+                    </div>
+                </div>
+                <div class="quota-percentage">{{ storage_percent|round(1) }}% Used</div>
+                {% if storage_percent >= 90 %}
+                <div class="quota-warning-text danger">⚠️ Storage almost full! Please delete some files.</div>
+                {% elif storage_percent >= 75 %}
+                <div class="quota-warning-text warning">⚠️ Storage is running low.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Storage Statistics Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span class="card-title-icon">📈</span>
+                    Storage Statistics
+                </h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Files</div>
+                    <div class="stat-value">{{ total_files }}</div>
+                    <div class="stat-sublabel">Uploaded files</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Actual Storage</div>
+                    <div class="stat-value">{{ (actual_storage_used / (1024*1024))|round(2) }}</div>
+                    <div class="stat-sublabel">MB (After Deduplication)</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Original Size</div>
+                    <div class="stat-value">{{ (original_total_size /(1024*1024))|round(2) }}</div>
+                    <div class="stat-sublabel">MB (Before Deduplication)</div>
+                </div>
+                
+                <div class="stat-card highlight">
+                    <div class="stat-label">💰 Total Savings</div>
+                    <div class="stat-value">{{ (total_savings_bytes /(1024* 1024))|round(2) }}</div>
+                    <div class="stat-sublabel">MB saved</div>
+                    <div class="stat-percentage">{{ savings_percentage|round(1) }}%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Folder Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span class="card-title-icon">📁</span>
+                    Create Folder
+                </h2>
+            </div>
+            <form method="post" action="/create-folder" class="folder-form">
+                <input type="text" name="folder_name" placeholder="Enter folder name (e.g., Photos, Documents)" 
+                       required class="text-input">
+                <button type="submit" class="btn-primary">Create Folder</button>
+            </form>
+        </div>
+
+        <!-- Upload File Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span class="card-title-icon">⬆️</span>
+                    Upload File
+                </h2>
+            </div>
+            <form id="uploadForm" method="post" enctype="multipart/form-data">
+                <div class="upload-area" id="dropArea">
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">Drag & drop your files here</div>
+                    <div class="upload-subtext">or click to browse (multiple files supported)</div>
+                    <button type="button" id="chooseBtn" class="btn-primary">Choose Files</button>
+                    <input type="file" id="fileInput" name="files" multiple required style="display: none;">
+                    <div id="selectedFiles" style="margin-top: 16px; color: var(--text-secondary); font-size: 14px;"></div>
+
+                    <div class="upload-folder-select">
+                        <label>Upload to folder:</label>
+                        <select name="folder" class="select-input">
+                            <option value="">Root (no folder)</option>
+                            {% for folder in folder_names %}
+                            <option value="{{ folder }}">{{ folder }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Your Files Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span class="card-title-icon">📂</span>
+                    Your Files
+                </h2>
+            </div>
+
+            {% if folders %}
+                {% for folder_name, file_list in folders.items() %}
+                <div class="folder-section">
+                    <details {% if folder_name == "Root" %}open{% endif %}>
+                        <summary class="folder-summary">
+                            <span class="folder-icon">📁</span>
+                            <span>{{ folder_name }}</span>
+                            <span class="folder-count">{{ file_list|length }}</span>
+                        </summary>
+
+                        <div class="file-list">
+                            {% if file_list %}
+                                {% for f in file_list %}
+                                    {% set item = files_with_shares|selectattr("file.id", "equalto", f.id)|list|first %}
+                                    <div class="file-item">
+                                        <div class="file-header">
+                                            <div class="file-name">{{ f.filename }}</div>
+                                            <div class="file-badge {% if f.is_duplicate %}badge-duplicate{% else %}badge-original{% endif %}">
+                                                {{ "Duplicate" if f.is_duplicate else "Original" }}
+                                            </div>
+                                        </div>
+
+                                        <div class="file-meta">
+                                            <div class="file-meta-item">
+                                                <span class="file-meta-label">Size:</span>
+                                                <span class="file-meta-value">{{ (f.size / (1024*1024))|round(2) }} MB</span>
+                                            </div>
+                                            <div class="file-meta-item">
+                                                <span class="file-meta-label">Uploaded:</span>
+                                                <span class="file-meta-value">{{ f.uploaded_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                                            </div>
+                                            <div class="file-meta-item">
+                                                <span class="file-meta-label">Downloads:</span>
+                                                <span class="file-meta-value">{{ item.share.download_count if item.share else '-' }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="file-actions">
+                                            <a href="/download/{{ f.id }}" class="btn-sm btn-download">Download</a>
+                                            
+                                            {% if item.share_token %}
+                                            <form action="/unshare/{{ f.id }}" method="post" style="display:inline;">
+                                                <button type="submit" class="btn-sm btn-unshare">Unshare</button>
+                                            </form>
+                                            {% else %}
+                                            <form action="/share/{{ f.id }}" method="post" style="display:inline;">
+                                                <button type="submit" class="btn-sm btn-share">Share</button>
+                                            </form>
+                                            {% endif %}
+                                            
+                                            <form action="/delete/{{ f.id }}" method="post" style="display:inline;">
+                                                <button type="submit" class="btn-sm btn-delete">Delete</button>
+                                            </form>
+                                            
+                                            <form action="/share-with-user/{{ f.id }}" method="post" class="share-user-form">
+                                                <select name="target_user" required>
+                                                    <option value="" disabled selected>Share with...</option>
+                                                    {% for u in all_users %}
+                                                    <option value="{{ u }}">{{ u }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button type="submit" class="btn-sm btn-share-private">Share Privately</button>
+                                            </form>
+                                        </div>
+
+                                        {% if item.share_token %}
+                                        <div class="share-link-container">
+                                            <label class="share-link-label">🔗 Public Share Link</label>
+                                            <div class="share-link-input-group">
+                                                <input type="text" 
+                                                       value="{{ request.url.scheme }}://{{ request.url.netloc }}/s/{{ item.share_token }}" 
+                                                       readonly 
+                                                       id="share-link-{{ f.id }}"
+                                                       class="share-link-input">
+                                                <button onclick="copyShareLink('{{ f.id }}')" class="btn-copy">Copy</button>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state">This folder is empty</div>
+                            {% endif %}
+                        </div>
+                    </details>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">No files uploaded yet. Start by uploading your first file!</div>
+            {% endif %}
+        </div>
+
+        <!-- Files Shared With You Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span class="card-title-icon">🤝</span>
+                    Files Shared With You
+                </h2>
+            </div>
+
+            {% if shared_files %}
+                <div class="file-list">
+                    {% for item in shared_files %}
+                    <div class="file-item">
+                        <div class="file-header">
+                            <div class="file-name">{{ item.file.filename }}</div>
+                        </div>
+
+                        <div class="file-meta">
+                            <div class="file-meta-item">
+                                <span class="file-meta-label">Size:</span>
+                                <span class="file-meta-value">{{ (item.file.size / (1024*1024))|round(2) }} MB</span>
+                            </div>
+                            <div class="file-meta-item">
+                                <span class="file-meta-label">Shared By:</span>
+                                <span class="file-meta-value">{{ item.shared_by }}</span>
+                            </div>
+                            <div class="file-meta-item">
+                                <span class="file-meta-label">Shared On:</span>
+                                <span class="file-meta-value">{{ item.shared_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="file-actions">
+                            <a href="/download/{{ item.file.id }}" class="btn-sm btn-download">Download</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">No files have been shared with you yet</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Copy share link function
+        function copyShareLink(fileId) {
+            const input = document.getElementById('share-link-' + fileId);
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            btn.style.background = '#10b981';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+
+        // Theme Toggle
+        const toggleBtn = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        toggleBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        toggleBtn.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            toggleBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Background Animation
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const points = [];
+        const numPoints = 50;
+        const maxDistance = 150;
+        const speed = 0.4;
+
+        for (let i = 0; i < numPoints; i++) {
+            points.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * speed,
+                vy: (Math.random() - 0.5) * speed
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const dx = points[i].x - points[j].x;
+                    const dy = points[i].y - points[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+
+                    if (dist < maxDistance) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[i].x, points[i].y);
+                        ctx.lineTo(points[j].x, points[j].y);
+                        const opacity = (1 - dist/maxDistance) * 0.3;
+                        ctx.strokeStyle = `rgba(124, 58, 237, ${opacity})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            points.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(124, 58, 237, 0.6)';
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Drag & Drop + Auto Upload
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const chooseBtn = document.getElementById('chooseBtn');
+        const form = document.getElementById('uploadForm');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                form.submit();
+            }
+        });
+
+        chooseBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                const fileCount = fileInput.files.length;
+                const fileNames = Array.from(fileInput.files).map(f => f.name).join(', ');
+                const selectedFilesDiv = document.getElementById('selectedFiles');
+                selectedFilesDiv.innerHTML = `<strong>${fileCount} file(s) selected:</strong> ${fileNames}`;
+                form.submit();
+            }
+        });
+    </script>
+
+</body>
+</html>

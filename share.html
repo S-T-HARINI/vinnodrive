@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared File - {{ file.filename }}</title>
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --panel-bg: #ffffff;
+            --text-color: #000000;
+            --heading-color: #ab47bc;
+            --border-color: #ab47bc;
+            --glow-color: rgba(171, 71, 188, 0.5);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --panel-bg: #1a0033;
+            --text-color: #d1c4e9;
+            --heading-color: #ab47bc;
+            --border-color: #ab47bc;
+            --glow-color: rgba(171, 71, 188, 0.6);
+        }
+
+        body, html {
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-primary);
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .share-box {
+            position: relative;
+            z-index: 10;
+            background: var(--panel-bg);
+            padding: 50px;
+            border-radius: 20px;
+            border: 3px solid var(--border-color);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3), 0 0 30px var(--glow-color);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--heading-color);
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .file-icon {
+            font-size: 5em;
+            margin: 20px 0;
+            filter: drop-shadow(0 0 10px var(--glow-color));
+        }
+
+        .file-name {
+            font-size: 1.5em;
+            color: var(--heading-color);
+            font-weight: bold;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+
+        .file-info {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(171, 71, 188, 0.1);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            padding: 8px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: var(--heading-color);
+        }
+
+        .info-value {
+            color: var(--text-color);
+        }
+
+        .download-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #ab47bc, #7e57c2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-top: 30px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px var(--glow-color);
+        }
+
+        .shared-by {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .download-count {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: var(--heading-color);
+            font-weight: bold;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: var(--heading-color);
+            z-index: 20;
+        }
+
+        .powered-by {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .powered-by a {
+            color: var(--heading-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .powered-by a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bgCanvas"></canvas>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+
+    <div class="share-box">
+        <h1>📤 Shared File</h1>
+        
+        <div class="file-icon">📄</div>
+        
+        <div class="file-name">{{ file.filename }}</div>
+
+        <div class="file-info">
+            <div class="info-row">
+                <span class="info-label">File Size:</span>
+                <span class="info-value">{{ "%.2f"|format(file.size / 1024) }} KB</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Uploaded:</span>
+                <span class="info-value">{{ file.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <!-- NEW: Download Count Row -->
+            <div class="info-row">
+                <span class="info-label">Downloads:</span>
+                <span class="info-value">{{ download_count }}</span>
+            </div>
+        </div>
+
+        <a href="/s/{{ share_token }}/download" class="download-btn">
+            ⬇️ Download File
+        </a>
+
+        <div class="download-count">
+            This file has been downloaded {{ download_count }} time{{ "s" if download_count != 1 else "" }}
+        </div>
+
+        <div class="shared-by">
+            Shared by: <strong>{{ shared_by }}</strong>
+        </div>
+
+        <div class="powered-by">
+            Powered by <a href="/">VinnoDrive</a>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const toggleBtn = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        toggleBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        toggleBtn.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            toggleBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Background Animation
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const points = [];
+        const numPoints = 45;
+        const maxDistance = 220;
+        const speed = 0.6;
+
+        for (let i = 0; i < numPoints; i++) {
+            points.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * speed,
+                vy: (Math.random() - 0.5) * speed
+            });
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const dx = points[i].x - points[j].x;
+                    const dy = points[i].y - points[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+
+                    if (dist < maxDistance) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[i].x, points[i].y);
+                        ctx.lineTo(points[j].x, points[j].y);
+                        ctx.strokeStyle = `rgba(171, 71, 188, ${1 - dist/maxDistance})`;
+                        ctx.lineWidth = 1.2;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            points.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#ab47bc';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ab47bc';
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+
+</body>
+</html>
