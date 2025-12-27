@@ -14,7 +14,7 @@ A secure cloud storage application with intelligent file deduplication that save
 ## Setup Instructions
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.13.5(preffered) or 3.8+
 
 ### Installation
 
@@ -103,5 +103,6 @@ Files are stored using SHA-256 hashing:
 - Configurable in `app/main.py`
 
 ## Author
+
 
 S T Harini
